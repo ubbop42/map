@@ -26,7 +26,7 @@ var INPUTS = [
     'anchorPoint', 'animation', 'clickable', 'cursor', 'draggable', 'icon', 'label', 'opacity',
     'optimized', 'place', 'position', 'shape', 'title', 'visible', 'zIndex', 'options',
     // ngui-map specific inputs
-    'geoFallbackPosition'
+    'geoFallbackPosition','lastPosition'
 ];
 var OUTPUTS = [
     'animationChanged', 'click', 'clickableChanged', 'cursorChanged', 'dblclick', 'drag', 'dragend', 'draggableChanged',
@@ -73,6 +73,31 @@ var Marker = (function (_super) {
                 console.error('ngui-map, error finding the location from', _this['position']);
                 _this.mapObject.setPosition(_this.objectOptions['geoFallbackPosition'] || new google.maps.LatLng(0, 0));
             }));
+        }
+        else if (this['lastPosition']) {
+            var startPos_1 = this['lastPosition'];
+            var endPos = new google.maps.LatLng(this['position'][0], this['position'][1]);
+            if (startPos_1 == null) {
+                this.mapObject.setPosition(endPos);
+            }
+            else {
+                var pointsNo_1 = 100;
+                var count_1 = 0;
+                var delay = 10; // for 1 second
+                var latDelta_1 = ((endPos.lat() - startPos_1[0]) / pointsNo_1);
+                var lngDelta_1 = ((endPos.lng() - startPos_1[1]) / pointsNo_1);
+                //linear animation
+                var smoothMovement_1 = setInterval(function () {
+                    count_1++;
+                    if (count_1 > pointsNo_1)
+                        clearInterval(smoothMovement_1);
+                    else {
+                        var latLng = new google.maps.LatLng(startPos_1[0] + latDelta_1 * count_1, startPos_1[1] + lngDelta_1 * count_1);
+                        if (_this.mapObject != null)
+                            _this.mapObject.setPosition(latLng);
+                    }
+                }, delay);
+            }
         }
     };
     return Marker;

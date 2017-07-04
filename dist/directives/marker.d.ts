@@ -21,6 +21,7 @@ export declare class Marker extends BaseMapDirective implements OnInit {
     zIndex: any;
     options: any;
     geoFallbackPosition: any;
+    lastPosition: any;
     animationChanged: any;
     click: any;
     clickableChanged: any;

@@ -7,7 +7,7 @@ const INPUTS = [
   'anchorPoint', 'animation', 'clickable', 'cursor', 'draggable', 'icon', 'label', 'opacity',
   'optimized', 'place', 'position', 'shape', 'title', 'visible', 'zIndex', 'options',
   // ngui-map specific inputs
-  'geoFallbackPosition'
+  'geoFallbackPosition','lastPosition'//for animation
 ];
 const OUTPUTS = [
   'animationChanged', 'click', 'clickableChanged', 'cursorChanged', 'dblclick', 'drag', 'dragend', 'draggableChanged',
@@ -67,6 +67,29 @@ export class Marker extends BaseMapDirective implements OnInit {
           this.mapObject.setPosition(this.objectOptions['geoFallbackPosition'] || new google.maps.LatLng(0, 0));
         }
       ));
+    }
+    else if (this['lastPosition']) { // enable marker animation
+      let startPos = this['lastPosition'];
+      let endPos = new google.maps.LatLng(this['position'][0], this['position'][1]);
+      if (startPos == null ) {
+        this.mapObject.setPosition(endPos);
+      }
+      else {
+        let pointsNo = 100;
+        let count = 0;
+        let delay = 10; // for 1 second
+        let latDelta = ((endPos.lat() - startPos[0]) / pointsNo);
+        let lngDelta = ((endPos.lng() - startPos[1]) / pointsNo);
+        //linear animation
+        let smoothMovement = setInterval(() => {
+          count++;
+          if (count > pointsNo) clearInterval(smoothMovement);
+          else {
+            let latLng = new google.maps.LatLng(startPos[0] + latDelta*count,startPos[1] + lngDelta*count);
+            if (this.mapObject != null)this.mapObject.setPosition(latLng);
+          }
+        }, delay);
+      }
     }
   }
 }
